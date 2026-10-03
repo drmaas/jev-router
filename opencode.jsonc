@@ -1,0 +1,16 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugins": [
+    {
+      "package": "./plugins/jev-router",
+      "options": {
+        "model": "jev-latest",
+        "gateThreshold": 0.3,
+        "fitsThreshold": 0.3,
+        "autoPermission": false,
+        "timeoutMs": 8000,
+        "maxStateChars": 4000
+      }
+    }
+  ]
+}
