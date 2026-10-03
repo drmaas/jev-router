@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   confidence,
+  decisionsRequest,
   distillState,
   ranked,
   suggestionBlock,
@@ -42,6 +43,30 @@ describe("distillState", () => {
       100,
     );
     expect(s.recent_context.length).toBeLessThanOrEqual(100);
+  });
+});
+
+describe("decisionsRequest", () => {
+  test("typesafe default", () => {
+    expect(decisionsRequest({ apiKey: "k" })).toEqual({
+      url: "https://api.typesafe.ai/v1/systemone",
+      model: "jev-latest",
+    });
+  });
+  test("openrouter default pins jev-1.13", () => {
+    expect(decisionsRequest({ apiKey: "k", provider: "openrouter" })).toEqual({
+      url: "https://openrouter.ai/api/alpha/decisions",
+      model: "typesafe/jev-1.13",
+    });
+  });
+  test("openrouter alias model passes through", () => {
+    const r = decisionsRequest({
+      apiKey: "k",
+      provider: "openrouter",
+      model: "~typesafe/jev-latest",
+    });
+    expect(r.url).toBe("https://openrouter.ai/api/alpha/decisions");
+    expect(r.model).toBe("~typesafe/jev-latest");
   });
 });
 

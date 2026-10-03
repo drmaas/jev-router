@@ -1,15 +1,19 @@
 import { Plugin } from "@opencode/plugin";
 import {
   DEFAULT_MODEL,
+  DEFAULT_OPENROUTER_MODEL,
   distillState,
   suggestSkill,
   suggestionBlock,
   systemOne,
+  type Provider,
   type Question,
 } from "./jev.js";
 
 interface Options {
-  /** TypeSafe API key. Defaults to TYPESAFE_API_KEY. */
+  /** "typesafe" (default) or "openrouter". Auto-detected from env when omitted. */
+  provider?: Provider;
+  /** TypeSafe API key, or OpenRouter key when provider is openrouter. */
   apiKey?: string;
   endpoint?: string;
   model?: string;
@@ -26,10 +30,18 @@ interface Options {
 }
 
 function resolveOpts(raw: Options): Required<Omit<Options, "apiKey">> & { apiKey: string } {
+  const provider: Provider =
+    raw.provider ??
+    (process.env["TYPESAFE_API_KEY"] ? "typesafe"
+      : process.env["OPENROUTER_API_KEY"] ? "openrouter"
+        : "typesafe");
+  const keyEnv = provider === "openrouter" ? "OPENROUTER_API_KEY" : "TYPESAFE_API_KEY";
+  const defaultModel = provider === "openrouter" ? DEFAULT_OPENROUTER_MODEL : DEFAULT_MODEL;
   return {
-    apiKey: raw.apiKey ?? process.env["TYPESAFE_API_KEY"] ?? "",
-    endpoint: raw.endpoint ?? process.env["TYPESAFE_ENDPOINT"] ?? "https://api.typesafe.ai",
-    model: raw.model ?? process.env["TYPESAFE_MODEL"] ?? DEFAULT_MODEL,
+    provider,
+    apiKey: raw.apiKey ?? process.env[keyEnv] ?? "",
+    endpoint: raw.endpoint ?? process.env["TYPESAFE_ENDPOINT"] ?? process.env["JEV_ENDPOINT"] ?? "",
+    model: raw.model ?? process.env["TYPESAFE_MODEL"] ?? defaultModel,
     gateThreshold: raw.gateThreshold ?? 0.3,
     fitsThreshold: raw.fitsThreshold ?? 0.3,
     autoPermission: raw.autoPermission ?? false,
@@ -44,7 +56,7 @@ export default Plugin.define({
     const opts = resolveOpts((ctx.options ?? {}) as Options);
     if (!opts.apiKey) {
       console.error(
-        "[jev-router] TYPESAFE_API_KEY is not set; Jev calls will be skipped (fail open).",
+        "[jev-router] No API key set (TYPESAFE_API_KEY or OPENROUTER_API_KEY); Jev calls will be skipped (fail open).",
       );
     }
 
@@ -150,7 +162,7 @@ export default Plugin.define({
         options: { namespace: "jev", codemode: true },
         execute: async (input, context) => {
           if (!opts.apiKey) {
-            return { content: "jev_ask unavailable: TYPESAFE_API_KEY is not set." };
+            return { content: "jev_ask unavailable: no API key set (TYPESAFE_API_KEY or OPENROUTER_API_KEY)." };
           }
           const { state, questions } = input as {
             state: unknown;

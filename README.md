@@ -12,8 +12,19 @@ Patterns used: `skill_suggestion` (two-call rank + rerank), `confidence-routing`
 
 ## Requirements
 
-- `TYPESAFE_API_KEY` in the environment (https://console.typesafe.ai/keys).
-- No GPU, no local model. Jev is hosted: `POST https://api.typesafe.ai/v1/systemone`.
+- One API key: `TYPESAFE_API_KEY` (https://console.typesafe.ai/keys) **or**
+  `OPENROUTER_API_KEY` (https://openrouter.ai/settings/keys). `TYPESAFE_API_KEY`
+  wins when both are set.
+- No GPU, no local model. Either way Jev is hosted.
+
+| Provider | Endpoint | Default model |
+| --- | --- | --- |
+| TypeSafe direct | `POST https://api.typesafe.ai/v1/systemone` | `jev-latest` |
+| OpenRouter | `POST https://openrouter.ai/api/alpha/decisions` | `typesafe/jev-1.13` (pinned; use `~typesafe/jev-latest` to track releases) |
+
+Same question shape on both; OpenRouter adds `usage.cost` per call. Same price:
+$0.042 per Mtok input, output free. Tutorial:
+https://openrouter.ai/docs/guides/community/jev-tutorial
 
 ## Layout
 
@@ -30,6 +41,8 @@ opencode.jsonc                  example consumer config
 ```sh
 opencode plugin add github:drmaas/jev-router
 export TYPESAFE_API_KEY=ts- replace-with-real-key
+# ...or use OpenRouter instead:
+export OPENROUTER_API_KEY=sk-or- replace-with-real-key
 ```
 
 Or local path during development:

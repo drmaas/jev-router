@@ -12,20 +12,35 @@ import os
 import urllib.request
 
 DEFAULT_ENDPOINT = "https://api.typesafe.ai"
+DEFAULT_OPENROUTER_ENDPOINT = "https://openrouter.ai"
 DEFAULT_MODEL = "jev-latest"
+DEFAULT_OPENROUTER_MODEL = "typesafe/jev-1.13"
 TIMEOUT_S = 12
 
 
 def config():
+    """Provider auto-detect: TYPESAFE_API_KEY wins, else OPENROUTER_API_KEY.
+    With neither key set, defaults to typesafe (fail open downstream)."""
+    if os.environ.get("TYPESAFE_API_KEY") or not os.environ.get("OPENROUTER_API_KEY"):
+        base = os.environ.get("TYPESAFE_ENDPOINT", DEFAULT_ENDPOINT).rstrip("/")
+        return {
+            "provider": "typesafe",
+            "api_key": os.environ.get("TYPESAFE_API_KEY", ""),
+            "url": base + "/v1/systemone",
+            "model": os.environ.get("TYPESAFE_MODEL", DEFAULT_MODEL),
+        }
+    base = os.environ.get("TYPESAFE_ENDPOINT", DEFAULT_OPENROUTER_ENDPOINT).rstrip("/")
+    path = "" if base.endswith("/api/alpha/decisions") else "/api/alpha/decisions"
     return {
-        "api_key": os.environ.get("TYPESAFE_API_KEY", ""),
-        "endpoint": os.environ.get("TYPESAFE_ENDPOINT", DEFAULT_ENDPOINT).rstrip("/"),
-        "model": os.environ.get("TYPESAFE_MODEL", DEFAULT_MODEL),
+        "provider": "openrouter",
+        "api_key": os.environ.get("OPENROUTER_API_KEY", ""),
+        "url": base + path,
+        "model": os.environ.get("TYPESAFE_MODEL", DEFAULT_OPENROUTER_MODEL),
     }
 
 
 def system_one(state, questions, timeout=TIMEOUT_S, model=None):
-    """POST /v1/systemone. Returns the parsed JSON body, or None on any failure."""
+    """POST a decision request. Returns the parsed JSON body, or None on failure."""
     cfg = config()
     if not cfg["api_key"]:
         return None
@@ -37,7 +52,7 @@ def system_one(state, questions, timeout=TIMEOUT_S, model=None):
         }
     ).encode("utf-8")
     req = urllib.request.Request(
-        cfg["endpoint"] + "/v1/systemone",
+        cfg["url"],
         data=body,
         headers={
             "Content-Type": "application/json",

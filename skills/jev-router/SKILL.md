@@ -49,7 +49,10 @@ https://docs.typesafe.ai/patterns/confidence-routing.md
   on-demand `jev_ask` tool. Shared client + distiller: `plugins/jev-router/jev.ts`.
 - Cursor hooks: `.cursor/hooks.json` with `.cursor/hooks/jev_policy.py`
   (`beforeShellExecution`, `preToolUse`) and `.cursor/hooks/jev_verify.py` (`stop`).
-- Auth: `TYPESAFE_API_KEY`. All calls fail open without it.
+- Auth: `TYPESAFE_API_KEY` or `OPENROUTER_API_KEY` (auto-detected; all calls fail open without one).
+- Providers: TypeSafe direct (`/v1/systemone`, `jev-latest`) or OpenRouter
+  (`/api/alpha/decisions`, `typesafe/jev-1.13`). Set `provider` explicitly to
+  override auto-detect.
 - State budget: distil transcripts to ~4000 chars (`request` + `recent_context`).
   Jev caps `state` at 32k tokens; never send a raw transcript.
 

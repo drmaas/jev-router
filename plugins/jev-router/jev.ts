@@ -2,10 +2,15 @@
 // so Cursor-side TS (if ever needed) and unit tests can import it directly.
 
 export const DEFAULT_ENDPOINT = "https://api.typesafe.ai";
+export const DEFAULT_OPENROUTER_ENDPOINT = "https://openrouter.ai";
 export const DEFAULT_MODEL = "jev-latest";
+export const DEFAULT_OPENROUTER_MODEL = "typesafe/jev-1.13";
+
+export type Provider = "typesafe" | "openrouter";
 
 export interface JevOptions {
   apiKey: string;
+  provider?: Provider;
   endpoint?: string;
   model?: string;
   timeoutMs?: number;
@@ -31,28 +36,36 @@ export class JevError extends Error {
   }
 }
 
-/** POST /v1/systemone with a hard timeout. Returns null on any failure (fail open). */
+/** Resolve the request URL + model for a provider. Exported for tests. */
+export function decisionsRequest(opts: JevOptions): { url: string; model: string } {
+  const provider = opts.provider ?? "typesafe";
+  if (provider === "openrouter") {
+    const base = (opts.endpoint || DEFAULT_OPENROUTER_ENDPOINT).replace(/\/$/, "");
+    const path = base.endsWith("/api/alpha/decisions") ? "" : "/api/alpha/decisions";
+    return { url: `${base}${path}`, model: opts.model ?? DEFAULT_OPENROUTER_MODEL };
+  }
+  const base = (opts.endpoint || DEFAULT_ENDPOINT).replace(/\/$/, "");
+  return { url: `${base}/v1/systemone`, model: opts.model ?? DEFAULT_MODEL };
+}
+
+/** POST a decision request with a hard timeout. Returns null on any failure (fail open). */
 export async function systemOne(
   state: unknown,
   questions: Record<string, Question>,
   opts: JevOptions,
 ): Promise<SystemOneResponse | null> {
-  const endpoint = (opts.endpoint ?? DEFAULT_ENDPOINT).replace(/\/$/, "");
+  const { url, model } = decisionsRequest(opts);
   const timeoutMs = opts.timeoutMs ?? 8000;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    const res = await fetch(`${endpoint}/v1/systemone`, {
+    const res = await fetch(url, {
       method: "POST",
       headers: {
         "content-type": "application/json",
         authorization: `Bearer ${opts.apiKey}`,
       },
-      body: JSON.stringify({
-        state,
-        questions,
-        model: opts.model ?? DEFAULT_MODEL,
-      }),
+      body: JSON.stringify({ state, questions, model }),
       signal: ctrl.signal,
     });
     if (!res.ok) return null;
