@@ -10,6 +10,31 @@ System One routing for coding agents. Jev decides, LLM generates.
 Upstream API docs: https://docs.typesafe.ai/llms.txt (source of truth).
 Patterns used: `skill_suggestion` (two-call rank + rerank), `confidence-routing`, `intent-routing`.
 
+## Why: speed and cost
+
+Jev answers typed questions in milliseconds at $0.042/Mtok input (output free).
+The plugin spends fractions of a cent per turn to avoid mistakes that cost full
+LLM turns. Reference numbers from TypeSafe cookbooks (488 requests, 182-skill
+roster; our roster is smaller, so per-call cost is lower):
+
+- Wrong skill loads 16.8% -> 7.3%, needless loads 9.8% -> 4.0%
+  ([skill_suggestion](https://docs.typesafe.ai/cookbooks/skill_suggestion.md)).
+  Each prevented miss saves a wasted turn: a full `SKILL.md` in context at LLM
+  prices plus the tool calls it triggers.
+- Independent questions batch into one request (Choice + gate Nouls = 1 round
+  trip): 12.2x cheaper, 10.0x faster than separate calls
+  ([parallel_questions](https://docs.typesafe.ai/cookbooks/parallel_questions.md)).
+- Per-turn overhead is ~0.3-0.5s of Jev calls. Net win when that prevents even
+  one wasted multi-second turn.
+- Permission gating (`autoPermission`) removes human-prompt wait on routine
+  actions; the `stop` verifier catches incomplete work before the session ends
+  instead of paying full re-investigation later.
+
+Caveats: the hook taxes every turn, so the win depends on your wrong-load rate.
+Thresholds (`gateThreshold`, `fitsThreshold`, default 0.3) are cookbook starting
+points, not tuned values. See the evaluation plan in the issue tracker before
+enabling `autoPermission`.
+
 ## Requirements
 
 - One API key: `TYPESAFE_API_KEY` (https://console.typesafe.ai/keys) **or**
