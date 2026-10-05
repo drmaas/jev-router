@@ -45,8 +45,12 @@ https://docs.typesafe.ai/patterns/confidence-routing.md
 ## In this repo
 
 - OpenCode plugin: `plugins/jev-router/` — turn steering (`session.hook("context")`),
-  opt-in permission gating (`permission.hook("evaluate")`, `autoPermission: true`),
-  on-demand `jev_ask` tool. Shared client + distiller: `plugins/jev-router/jev.ts`.
+  tool-call steering (`tool.hook("execute.before")`, redirect on confidence),
+  clarify-vs-act + opt-in permission gating (`permission.hook("evaluate")`,
+  `autoPermission: true`), failure advisor (`tool.hook("execute.after")`),
+  subagent routing, code review (`reviewTrigger: stop|edits|both`, default `stop`;
+  reviewer model picked from the live roster when `reviewModel: auto`).
+  Shared client + distiller + judgement builders: `plugins/jev-router/jev.ts`.
 - Cursor hooks: `.cursor/hooks.json` with `.cursor/hooks/jev_policy.py`
   (`beforeShellExecution`, `preToolUse`) and `.cursor/hooks/jev_verify.py` (`stop`).
 - Auth: `TYPESAFE_API_KEY` or `OPENROUTER_API_KEY` (auto-detected; all calls fail open without one).

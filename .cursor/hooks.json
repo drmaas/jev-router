@@ -18,6 +18,11 @@
         "command": ".cursor/hooks/jev_verify.py",
         "timeout": 30,
         "loop_limit": 3
+      },
+      {
+        "command": ".cursor/hooks/jev_review.py",
+        "timeout": 30,
+        "loop_limit": 3
       }
     ]
   }

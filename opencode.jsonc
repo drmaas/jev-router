@@ -5,11 +5,30 @@
       "package": "./plugins/jev-router",
       "options": {
         "model": "jev-latest",
+        // Validated by docs/eval.md live v2 (26 tasks, 2 runs). Do not raise:
+        // gate cliff at 0.4 (S04), fits flat 0.2-0.5.
         "gateThreshold": 0.3,
         "fitsThreshold": 0.3,
+        // HOLD at false: permission verdicts 6/6 live but P04 ask at 0.26-0.33 confidence.
         "autoPermission": false,
         "timeoutMs": 8000,
-        "maxStateChars": 4000
+        "maxStateChars": 4000,
+        // New judgements (docs/judgements.md). Hard modes are live-TRIAL:
+        // validated on small-n buckets (run3), not yet sweep-tuned. Every hard
+        // action needs confidence (toolMinConfidence/subagentMinConfidence),
+        // fails open on Jev null/timeout, and leaves a <jev_redirect> audit note.
+        "toolSteering": "redirect",
+        "toolGateThreshold": 0.3,
+        "toolFitsThreshold": 0.3,
+        "toolMinConfidence": 0.7,
+        "clarify": "block",
+        "failureAdvisor": "redirect",
+        "subagentRouting": "redirect",
+        "subagentMinConfidence": 0.7,
+        "review": "redirect",
+        "reviewTrigger": "stop",
+        "reviewAfterEdits": 3,
+        "reviewModel": "auto"
       }
     }
   ]

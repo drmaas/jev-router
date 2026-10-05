@@ -7,7 +7,8 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit -p plugins/jev-router/tsconfig.json",
-    "test": "bun test tests/"
+    "test": "bun test tests/",
+    "eval": "bun tests/eval-harness.ts"
   },
   "devDependencies": {
     "typescript": "^5.6.0"

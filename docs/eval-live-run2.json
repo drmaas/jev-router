@@ -1,0 +1,578 @@
+{
+  "mode": "live",
+  "liveMeta": {
+    "provider": "openrouter",
+    "model": "typesafe/jev-1.13",
+    "totalCalls": 42,
+    "totalLatencyMs": 12968,
+    "totalJevCost": 0.0008854860000000001,
+    "errors": []
+  },
+  "sims": [
+    {
+      "id": "S01",
+      "expected": "pdf-fill",
+      "gateMean": 0.853,
+      "fitsMax": 0.96,
+      "winnerIfSuggested": "pdf-fill",
+      "winnerCorrectIfSuggested": true,
+      "wideTokens": 591,
+      "narrowTokens": 494
+    },
+    {
+      "id": "S02",
+      "expected": "pptx-author",
+      "gateMean": 0.703,
+      "fitsMax": 0.96,
+      "winnerIfSuggested": "pptx-author",
+      "winnerCorrectIfSuggested": true,
+      "wideTokens": 591,
+      "narrowTokens": 502
+    },
+    {
+      "id": "S03",
+      "expected": "code-review",
+      "gateMean": 0.723,
+      "fitsMax": 0.96,
+      "winnerIfSuggested": "code-review",
+      "winnerCorrectIfSuggested": true,
+      "wideTokens": 589,
+      "narrowTokens": 494
+    },
+    {
+      "id": "S04",
+      "expected": "db-migrate",
+      "gateMean": 0.38,
+      "fitsMax": 0.84,
+      "winnerIfSuggested": "db-migrate",
+      "winnerCorrectIfSuggested": true,
+      "wideTokens": 589,
+      "narrowTokens": 500
+    },
+    {
+      "id": "S05",
+      "expected": "test-runner",
+      "gateMean": 0.86,
+      "fitsMax": 0.94,
+      "winnerIfSuggested": "test-runner",
+      "winnerCorrectIfSuggested": true,
+      "wideTokens": 589,
+      "narrowTokens": 506
+    },
+    {
+      "id": "S06",
+      "expected": "doc-search",
+      "gateMean": 0.733,
+      "fitsMax": 0.93,
+      "winnerIfSuggested": "doc-search",
+      "winnerCorrectIfSuggested": true,
+      "wideTokens": 589,
+      "narrowTokens": 500
+    },
+    {
+      "id": "U01",
+      "expected": null,
+      "gateMean": 0.1,
+      "fitsMax": 0.18,
+      "winnerIfSuggested": "doc-search",
+      "winnerCorrectIfSuggested": false,
+      "wideTokens": 590,
+      "narrowTokens": 503
+    },
+    {
+      "id": "U02",
+      "expected": null,
+      "gateMean": 0.093,
+      "fitsMax": 0.15,
+      "winnerIfSuggested": "code-review",
+      "winnerCorrectIfSuggested": false,
+      "wideTokens": 588,
+      "narrowTokens": 501
+    },
+    {
+      "id": "U03",
+      "expected": null,
+      "gateMean": 0.37,
+      "fitsMax": 0.04,
+      "winnerIfSuggested": "doc-search",
+      "winnerCorrectIfSuggested": false,
+      "wideTokens": 589,
+      "narrowTokens": 502
+    },
+    {
+      "id": "U04",
+      "expected": null,
+      "gateMean": 0.077,
+      "fitsMax": 0.04,
+      "winnerIfSuggested": "doc-search",
+      "winnerCorrectIfSuggested": false,
+      "wideTokens": 587,
+      "narrowTokens": 494
+    },
+    {
+      "id": "U05",
+      "expected": null,
+      "gateMean": 0.07,
+      "fitsMax": 0.35,
+      "winnerIfSuggested": "code-review",
+      "winnerCorrectIfSuggested": false,
+      "wideTokens": 590,
+      "narrowTokens": 495
+    },
+    {
+      "id": "U06",
+      "expected": null,
+      "gateMean": 0.35,
+      "fitsMax": 0.05,
+      "winnerIfSuggested": "doc-search",
+      "winnerCorrectIfSuggested": false,
+      "wideTokens": 589,
+      "narrowTokens": 500
+    },
+    {
+      "id": "L01a",
+      "expected": "doc-search",
+      "gateMean": 0.813,
+      "fitsMax": 0.06,
+      "winnerIfSuggested": "image-edit",
+      "winnerCorrectIfSuggested": false,
+      "wideTokens": 590,
+      "narrowTokens": 493
+    },
+    {
+      "id": "L01b",
+      "expected": "pdf-fill",
+      "gateMean": 0.85,
+      "fitsMax": 0.96,
+      "winnerIfSuggested": "pdf-fill",
+      "winnerCorrectIfSuggested": true,
+      "wideTokens": 588,
+      "narrowTokens": 499
+    },
+    {
+      "id": "L02a",
+      "expected": "image-edit",
+      "gateMean": 0.783,
+      "fitsMax": 0.96,
+      "winnerIfSuggested": "image-edit",
+      "winnerCorrectIfSuggested": true,
+      "wideTokens": 599,
+      "narrowTokens": 504
+    },
+    {
+      "id": "L02b",
+      "expected": "pptx-author",
+      "gateMean": 0.723,
+      "fitsMax": 0.9,
+      "winnerIfSuggested": "image-edit",
+      "winnerCorrectIfSuggested": false,
+      "wideTokens": 598,
+      "narrowTokens": 515
+    }
+  ],
+  "cells": [
+    {
+      "gateT": 0.1,
+      "fitsT": 0.1,
+      "correct": 8,
+      "wrong": 1,
+      "needless": 1,
+      "miss": 1,
+      "okQuiet": 5,
+      "jevCost": 0.00067,
+      "preventedMisses": 4,
+      "llmSaved": 0.1395,
+      "net": 0.13883
+    },
+    {
+      "gateT": 0.1,
+      "fitsT": 0.2,
+      "correct": 8,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 1,
+      "okQuiet": 6,
+      "jevCost": 0.00067,
+      "preventedMisses": 4,
+      "llmSaved": 0.1485,
+      "net": 0.14783
+    },
+    {
+      "gateT": 0.1,
+      "fitsT": 0.3,
+      "correct": 8,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 1,
+      "okQuiet": 6,
+      "jevCost": 0.00067,
+      "preventedMisses": 4,
+      "llmSaved": 0.1485,
+      "net": 0.14783
+    },
+    {
+      "gateT": 0.1,
+      "fitsT": 0.4,
+      "correct": 8,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 1,
+      "okQuiet": 6,
+      "jevCost": 0.00067,
+      "preventedMisses": 4,
+      "llmSaved": 0.1485,
+      "net": 0.14783
+    },
+    {
+      "gateT": 0.1,
+      "fitsT": 0.5,
+      "correct": 8,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 1,
+      "okQuiet": 6,
+      "jevCost": 0.00067,
+      "preventedMisses": 4,
+      "llmSaved": 0.1485,
+      "net": 0.14783
+    },
+    {
+      "gateT": 0.2,
+      "fitsT": 0.1,
+      "correct": 8,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 1,
+      "okQuiet": 6,
+      "jevCost": 0.00065,
+      "preventedMisses": 4,
+      "llmSaved": 0.1485,
+      "net": 0.14785
+    },
+    {
+      "gateT": 0.2,
+      "fitsT": 0.2,
+      "correct": 8,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 1,
+      "okQuiet": 6,
+      "jevCost": 0.00065,
+      "preventedMisses": 4,
+      "llmSaved": 0.1485,
+      "net": 0.14785
+    },
+    {
+      "gateT": 0.2,
+      "fitsT": 0.3,
+      "correct": 8,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 1,
+      "okQuiet": 6,
+      "jevCost": 0.00065,
+      "preventedMisses": 4,
+      "llmSaved": 0.1485,
+      "net": 0.14785
+    },
+    {
+      "gateT": 0.2,
+      "fitsT": 0.4,
+      "correct": 8,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 1,
+      "okQuiet": 6,
+      "jevCost": 0.00065,
+      "preventedMisses": 4,
+      "llmSaved": 0.1485,
+      "net": 0.14785
+    },
+    {
+      "gateT": 0.2,
+      "fitsT": 0.5,
+      "correct": 8,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 1,
+      "okQuiet": 6,
+      "jevCost": 0.00065,
+      "preventedMisses": 4,
+      "llmSaved": 0.1485,
+      "net": 0.14785
+    },
+    {
+      "gateT": 0.3,
+      "fitsT": 0.1,
+      "correct": 8,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 1,
+      "okQuiet": 6,
+      "jevCost": 0.00065,
+      "preventedMisses": 4,
+      "llmSaved": 0.1485,
+      "net": 0.14785
+    },
+    {
+      "gateT": 0.3,
+      "fitsT": 0.2,
+      "correct": 8,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 1,
+      "okQuiet": 6,
+      "jevCost": 0.00065,
+      "preventedMisses": 4,
+      "llmSaved": 0.1485,
+      "net": 0.14785
+    },
+    {
+      "gateT": 0.3,
+      "fitsT": 0.3,
+      "correct": 8,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 1,
+      "okQuiet": 6,
+      "jevCost": 0.00065,
+      "preventedMisses": 4,
+      "llmSaved": 0.1485,
+      "net": 0.14785
+    },
+    {
+      "gateT": 0.3,
+      "fitsT": 0.4,
+      "correct": 8,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 1,
+      "okQuiet": 6,
+      "jevCost": 0.00065,
+      "preventedMisses": 4,
+      "llmSaved": 0.1485,
+      "net": 0.14785
+    },
+    {
+      "gateT": 0.3,
+      "fitsT": 0.5,
+      "correct": 8,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 1,
+      "okQuiet": 6,
+      "jevCost": 0.00065,
+      "preventedMisses": 4,
+      "llmSaved": 0.1485,
+      "net": 0.14785
+    },
+    {
+      "gateT": 0.4,
+      "fitsT": 0.1,
+      "correct": 7,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 2,
+      "okQuiet": 6,
+      "jevCost": 0.00059,
+      "preventedMisses": 3,
+      "llmSaved": 0.117,
+      "net": 0.11641
+    },
+    {
+      "gateT": 0.4,
+      "fitsT": 0.2,
+      "correct": 7,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 2,
+      "okQuiet": 6,
+      "jevCost": 0.00059,
+      "preventedMisses": 3,
+      "llmSaved": 0.117,
+      "net": 0.11641
+    },
+    {
+      "gateT": 0.4,
+      "fitsT": 0.3,
+      "correct": 7,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 2,
+      "okQuiet": 6,
+      "jevCost": 0.00059,
+      "preventedMisses": 3,
+      "llmSaved": 0.117,
+      "net": 0.11641
+    },
+    {
+      "gateT": 0.4,
+      "fitsT": 0.4,
+      "correct": 7,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 2,
+      "okQuiet": 6,
+      "jevCost": 0.00059,
+      "preventedMisses": 3,
+      "llmSaved": 0.117,
+      "net": 0.11641
+    },
+    {
+      "gateT": 0.4,
+      "fitsT": 0.5,
+      "correct": 7,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 2,
+      "okQuiet": 6,
+      "jevCost": 0.00059,
+      "preventedMisses": 3,
+      "llmSaved": 0.117,
+      "net": 0.11641
+    },
+    {
+      "gateT": 0.5,
+      "fitsT": 0.1,
+      "correct": 7,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 2,
+      "okQuiet": 6,
+      "jevCost": 0.00059,
+      "preventedMisses": 3,
+      "llmSaved": 0.117,
+      "net": 0.11641
+    },
+    {
+      "gateT": 0.5,
+      "fitsT": 0.2,
+      "correct": 7,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 2,
+      "okQuiet": 6,
+      "jevCost": 0.00059,
+      "preventedMisses": 3,
+      "llmSaved": 0.117,
+      "net": 0.11641
+    },
+    {
+      "gateT": 0.5,
+      "fitsT": 0.3,
+      "correct": 7,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 2,
+      "okQuiet": 6,
+      "jevCost": 0.00059,
+      "preventedMisses": 3,
+      "llmSaved": 0.117,
+      "net": 0.11641
+    },
+    {
+      "gateT": 0.5,
+      "fitsT": 0.4,
+      "correct": 7,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 2,
+      "okQuiet": 6,
+      "jevCost": 0.00059,
+      "preventedMisses": 3,
+      "llmSaved": 0.117,
+      "net": 0.11641
+    },
+    {
+      "gateT": 0.5,
+      "fitsT": 0.5,
+      "correct": 7,
+      "wrong": 1,
+      "needless": 0,
+      "miss": 2,
+      "okQuiet": 6,
+      "jevCost": 0.00059,
+      "preventedMisses": 3,
+      "llmSaved": 0.117,
+      "net": 0.11641
+    }
+  ],
+  "perms": [
+    {
+      "id": "P01",
+      "expected": "allow",
+      "verdict": "allow",
+      "confidence": 1,
+      "correct": true
+    },
+    {
+      "id": "P02",
+      "expected": "allow",
+      "verdict": "allow",
+      "confidence": 0.67,
+      "correct": true
+    },
+    {
+      "id": "P03",
+      "expected": "allow",
+      "verdict": "allow",
+      "confidence": 1,
+      "correct": true
+    },
+    {
+      "id": "P04",
+      "expected": "ask",
+      "verdict": "ask",
+      "confidence": 0.26,
+      "correct": true
+    },
+    {
+      "id": "P05",
+      "expected": "deny",
+      "verdict": "deny",
+      "confidence": 0.95,
+      "correct": true
+    },
+    {
+      "id": "P06",
+      "expected": "deny",
+      "verdict": "deny",
+      "confidence": 0.63,
+      "correct": true
+    }
+  ],
+  "stops": [
+    {
+      "id": "T01",
+      "expectedDone": true,
+      "pDone": 0.7,
+      "flagged": false,
+      "correct": true,
+      "kind": "true-quiet"
+    },
+    {
+      "id": "T02",
+      "expectedDone": false,
+      "pDone": 0.04,
+      "flagged": true,
+      "correct": true,
+      "kind": "true-catch"
+    },
+    {
+      "id": "T03",
+      "expectedDone": false,
+      "pDone": 0.06,
+      "flagged": true,
+      "correct": true,
+      "kind": "true-catch"
+    },
+    {
+      "id": "T04",
+      "expectedDone": true,
+      "pDone": 0.44,
+      "flagged": true,
+      "correct": false,
+      "kind": "false-alarm"
+    }
+  ]
+}
