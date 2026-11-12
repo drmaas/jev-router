@@ -106,7 +106,7 @@ docs/judgements.md              new-judgement eval (live trial)
 ## OpenCode quickstart
 
 ```sh
-opencode plugin add github:drmaas/jev-router
+opencode plugin add 'git+https://github.com/drmaas/jev-router.git#path:plugins/jev-router'
 export TYPESAFE_API_KEY=ts- replace-with-real-key
 # ...or use OpenRouter instead:
 export OPENROUTER_API_KEY=sk-or- replace-with-real-key
