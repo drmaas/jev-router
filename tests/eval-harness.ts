@@ -1,8 +1,8 @@
 // Offline eval harness for issue #1.
 // Mock-first: deterministic simulation of Jev scores, clearly labeled.
 // Live path (`--live`) replays the same tasks through real `systemOne`
-// when TYPESAFE_API_KEY / OPENROUTER_API_KEY is present; otherwise it
-// falls back to mock with a warning.
+// when TYPESAFE_API_KEY / OPENROUTER_API_KEY is present, or with
+// JEV_PROVIDER=nace and NACE_API_KEY; otherwise it falls back to mock with a warning.
 //
 // Threshold sweep is exact without re-calling Jev: gate/fits thresholds
 // are applied post-hoc to recorded scores, so one pass per task yields
@@ -367,8 +367,10 @@ function round5(n: number): number {
 import {
   GATE_QUESTIONS,
   ranked,
+  resolveBackend,
   systemOne,
   type JevOptions,
+  type Provider,
 } from "../plugins/jev-router/jev.js";
 
 const INVERTED_LIVE = new Set(["prose_suffices"]);
@@ -382,7 +384,13 @@ export interface LiveMeta {
   errors: string[];
 }
 
-export function resolveLiveOpts(): (JevOptions & { provider: "typesafe" | "openrouter" }) | null {
+export function resolveLiveOpts(): (JevOptions & { provider: Provider }) | null {
+  const chosen = resolveBackend({});
+  if (chosen.provider === "nace") return chosen.apiKey ? { ...chosen, timeoutMs: 15000 } : null;
+  if (chosen.problem?.startsWith("unknown")) {
+    console.error(`[eval] ${chosen.problem}`);
+    return null;
+  }
   if (process.env["TYPESAFE_API_KEY"]) {
     return {
       provider: "typesafe",
@@ -708,7 +716,15 @@ if (import.meta.main) {
     }
     const grid = [0.1, 0.2, 0.3, 0.4, 0.5];
     const cells = sweep(sims, grid, grid);
-    console.log(JSON.stringify({ mode: "live", liveMeta: meta, sims, cells, perms, stops, tools, clarifies, failures, reviews }, null, 2));
+    // The cost columns are priced per Mtok at TypeSafe's rate, which is wrong for Nace, so a Nace run reports none.
+    const shown =
+      liveOpts.provider === "nace"
+        ? {
+            liveMeta: (({ totalJevCost, ...rest }) => rest)(meta),
+            cells: cells.map(({ jevCost, llmSaved, net, ...counts }) => counts),
+          }
+        : { liveMeta: meta, cells };
+    console.log(JSON.stringify({ mode: "live", ...shown, sims, perms, stops, tools, clarifies, failures, reviews }, null, 2));
   } else {
     const { skillTasks: st, permissionTasks: pt, stopTasks: tt } = loadTasks();
     const sims = (st as SkillTask[]).map(simulateSkill);

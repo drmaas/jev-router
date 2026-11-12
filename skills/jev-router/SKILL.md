@@ -11,7 +11,8 @@ description: >
 # Jev routing
 
 Jev is a System One model: it returns typed judgments, not text. Code owns the
-workflow; Jev supplies the decision. Live docs are the source of truth:
+workflow; Jev supplies the decision (a Drex model does, under the opt-in Nace backend).
+Live docs are the source of truth:
 https://docs.typesafe.ai/llms.txt
 
 ## When to use Jev vs the LLM
@@ -54,11 +55,16 @@ https://docs.typesafe.ai/patterns/confidence-routing.md
 - Cursor hooks: `.cursor/hooks.json` with `.cursor/hooks/jev_policy.py`
   (`beforeShellExecution`, `preToolUse`) and `.cursor/hooks/jev_verify.py` (`stop`).
 - Auth: `TYPESAFE_API_KEY` or `OPENROUTER_API_KEY` (auto-detected; all calls fail open without one).
+  `NACE_API_KEY` is used only with `JEV_PROVIDER=nace`.
 - Providers: TypeSafe direct (`/v1/systemone`, `jev-latest`) or OpenRouter
   (`/api/alpha/decisions`, `typesafe/jev-1.13`). Set `provider` explicitly to
-  override auto-detect.
+  override auto-detect. Nace (`/v1/systemone`, `drex-max-v1.1`, `NACE_API_KEY`) is
+  never auto-detected: choose it with `provider: "nace"` or `JEV_PROVIDER=nace`. Then a Drex
+  model answers instead of Jev, and it scored lower on this repo's fixtures (README, "Where
+  Drex did worse than Jev here").
 - State budget: distil transcripts to ~4000 chars (`request` + `recent_context`).
-  Jev caps `state` at 32k tokens; never send a raw transcript.
+  Jev caps `state` at 32k tokens; a Drex model has its own limit per model
+  (https://console.nace.ai/models). Never send a raw transcript.
 
 ## API reminder
 

@@ -1,12 +1,109 @@
 // Shared Jev client + state distillation. No dependency on @opencode/plugin,
 // so Cursor-side TS (if ever needed) and unit tests can import it directly.
 
+import nace from "./nace.json" with { type: "json" };
+
 export const DEFAULT_ENDPOINT = "https://api.typesafe.ai";
 export const DEFAULT_OPENROUTER_ENDPOINT = "https://openrouter.ai";
 export const DEFAULT_MODEL = "jev-latest";
 export const DEFAULT_OPENROUTER_MODEL = "typesafe/jev-1.13";
 
-export type Provider = "typesafe" | "openrouter";
+// Nace is never auto-detected: it is chosen with `provider: "nace"` or JEV_PROVIDER=nace.
+// nace.json is shared with .cursor/hooks/nace.json (tests/nace.test.ts keeps them identical).
+export const NACE = nace;
+export const NACE_CLIENT = `${nace.clients.opencode}/${nace.clientVersion}`;
+
+export const PROVIDERS = ["typesafe", "openrouter", "nace"] as const;
+export type Provider = (typeof PROVIDERS)[number];
+
+export interface Backend {
+  provider: Provider;
+  apiKey: string;
+  endpoint: string;
+  model: string;
+  /** Why this backend sends nothing: an unknown provider, or no key. Set exactly when `apiKey` is empty. */
+  problem?: string;
+}
+
+/**
+ * Pick the backend and read its key, endpoint and model. An explicit `provider` option,
+ * then JEV_PROVIDER, then whichever key is set. Whatever `provider` holds, a name that is
+ * not one of PROVIDERS (a typo, or a value that is not a string) gives a backend with no key
+ * and a `problem`, so it skips Jev instead of stopping the plugin, and never falls back to
+ * another provider. A null or empty option counts as unset. Nace reads only its own
+ * variables, and ignores the generic `apiKey`, `endpoint` and `model` options, which are
+ * TypeSafe and OpenRouter settings (the repo's own opencode.jsonc sets `model` to
+ * `jev-latest`), so nothing aimed at another provider can redirect its key or model.
+ */
+export function resolveBackend(
+  raw: { provider?: unknown; apiKey?: string; endpoint?: string; model?: string },
+  env: Record<string, string | undefined> = process.env,
+): Backend {
+  const option: unknown = raw.provider;
+  const fromOption = option != null && !(typeof option === "string" && option.trim() === "");
+  const value: unknown = fromOption ? option : env["JEV_PROVIDER"];
+  const sourceName = fromOption ? "provider option" : "JEV_PROVIDER";
+  const named = typeof value === "string" ? value.trim().toLowerCase() : value;
+  const chosen = PROVIDERS.find((p) => p === named);
+  if (named !== undefined && named !== "" && !chosen) {
+    const valid = PROVIDERS.join(", ");
+    return { provider: "typesafe", apiKey: "", endpoint: "", model: "", problem: `unknown ${sourceName} (valid values: ${valid})` };
+  }
+  const provider: Provider =
+    chosen ?? (env["TYPESAFE_API_KEY"] ? "typesafe" : env["OPENROUTER_API_KEY"] ? "openrouter" : "typesafe");
+  const backend = pickBackend(provider, raw, env);
+  return backend.apiKey ? backend : { ...backend, problem: noKeyProblem(provider, env) };
+}
+
+function pickBackend(
+  provider: Provider,
+  raw: { apiKey?: string; endpoint?: string; model?: string },
+  env: Record<string, string | undefined>,
+): Backend {
+  if (provider === "nace") {
+    return {
+      provider,
+      apiKey: env[nace.keyEnv] ?? "",
+      endpoint: env[nace.baseUrlEnv] ?? "",
+      model: env[nace.modelEnv] || nace.defaultModel,
+    };
+  }
+  const openrouter = provider === "openrouter";
+  return {
+    provider,
+    apiKey: raw.apiKey ?? env[openrouter ? "OPENROUTER_API_KEY" : "TYPESAFE_API_KEY"] ?? "",
+    endpoint: raw.endpoint ?? env["TYPESAFE_ENDPOINT"] ?? env["JEV_ENDPOINT"] ?? "",
+    model: raw.model ?? env["TYPESAFE_MODEL"] ?? (openrouter ? DEFAULT_OPENROUTER_MODEL : DEFAULT_MODEL),
+  };
+}
+
+function noKeyProblem(provider: Provider, env: Record<string, string | undefined>): string {
+  if (provider === "nace") return `No API key set (${nace.keyEnv})`;
+  const base = "No API key set (TYPESAFE_API_KEY or OPENROUTER_API_KEY)";
+  return env[nace.keyEnv] ? `${base}; ${nace.keyEnv} is set, but Nace needs JEV_PROVIDER=nace` : base;
+}
+
+/** Nace carries the key, so it goes only over https, or http to this machine. Null when the URL is fine, else why not. */
+export function naceUrlProblem(url: string): string | null {
+  let u: URL;
+  try {
+    u = new URL(url);
+  } catch {
+    return "not a valid URL";
+  }
+  if (u.username || u.password) return "the URL contains credentials";
+  if (u.protocol === "https:") return null;
+  if (u.protocol !== "http:") return "the scheme must be https";
+  return ["localhost", "127.0.0.1", "[::1]"].includes(u.hostname)
+    ? null
+    : "plain http is only allowed to localhost, 127.0.0.1 or ::1";
+}
+
+/** Where a refused URL points, for the stderr line: its origin, or "that URL" when it has none (not a URL, or a scheme such as file:). */
+function originOf(url: string): string {
+  const origin = URL.canParse(url) ? new URL(url).origin : "null";
+  return origin === "null" ? "that URL" : origin;
+}
 
 export interface JevOptions {
   apiKey: string;
@@ -39,6 +136,10 @@ export class JevError extends Error {
 /** Resolve the request URL + model for a provider. Exported for tests. */
 export function decisionsRequest(opts: JevOptions): { url: string; model: string } {
   const provider = opts.provider ?? "typesafe";
+  if (provider === "nace") {
+    const base = (opts.endpoint || nace.baseUrl).replace(/\/$/, "");
+    return { url: `${base}${nace.path}`, model: opts.model ?? nace.defaultModel };
+  }
   if (provider === "openrouter") {
     const base = (opts.endpoint || DEFAULT_OPENROUTER_ENDPOINT).replace(/\/$/, "");
     const path = base.endsWith("/api/alpha/decisions") ? "" : "/api/alpha/decisions";
@@ -48,6 +149,20 @@ export function decisionsRequest(opts: JevOptions): { url: string; model: string
   return { url: `${base}/v1/systemone`, model: opts.model ?? DEFAULT_MODEL };
 }
 
+/** One stderr line per failed Nace call: status, error type and request id, never the message. */
+async function reportNaceFailure(res: Response): Promise<void> {
+  let type = "unknown";
+  let requestId = res.headers.get("x-request-id") ?? "none";
+  try {
+    const body = (await res.json()) as { error?: { type?: string }; request_id?: string };
+    type = body.error?.type ?? type;
+    requestId = body.request_id ?? requestId;
+  } catch {
+    // Non-JSON error body: status alone.
+  }
+  console.error(`[jev-router] nace request failed: ${res.status} ${type} request_id=${requestId}`);
+}
+
 /** POST a decision request with a hard timeout. Returns null on any failure (fail open). */
 export async function systemOne(
   state: unknown,
@@ -55,6 +170,12 @@ export async function systemOne(
   opts: JevOptions,
 ): Promise<SystemOneResponse | null> {
   const { url, model } = decisionsRequest(opts);
+  const isNace = opts.provider === "nace";
+  const refusal = isNace ? naceUrlProblem(url) : null;
+  if (refusal) {
+    console.error(`[jev-router] nace: refusing to send the key to ${originOf(url)}: ${refusal}`);
+    return null;
+  }
   const timeoutMs = opts.timeoutMs ?? 8000;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -64,13 +185,19 @@ export async function systemOne(
       headers: {
         "content-type": "application/json",
         authorization: `Bearer ${opts.apiKey}`,
+        ...(isNace ? { [nace.attributionHeader]: NACE_CLIENT } : {}),
       },
       body: JSON.stringify({ state, questions, model }),
       signal: ctrl.signal,
+      ...(isNace ? { redirect: "error" as const } : {}),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      if (isNace) await reportNaceFailure(res);
+      return null;
+    }
     return (await res.json()) as SystemOneResponse;
-  } catch {
+  } catch (e) {
+    if (isNace) console.error(`[jev-router] nace request failed: ${e instanceof Error ? e.name : "error"}`);
     return null;
   } finally {
     clearTimeout(timer);

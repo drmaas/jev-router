@@ -1,7 +1,7 @@
 {
   "name": "opencode-jev-router",
   "version": "0.1.0",
-  "description": "System One routing for OpenCode: Jev decides, the LLM generates",
+  "description": "System One routing for OpenCode: Jev (or, opt-in, Nace's Drex) decides, the LLM generates",
   "license": "MIT",
   "type": "module",
   "main": "./index.ts",
